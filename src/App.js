@@ -10,6 +10,10 @@ import Checkout from './components/CheckoutForm/Checkout/Checkout';
 const App = () => {
     const [products,setProducts]=useState([]);
     const [cart,setCart] =useState({});
+    const [order,setOrder]=useState({});
+    const [boolcart,setboolcart]=useState(true);
+    
+    const [errormessage,seterrormessage]=useState('')
 
     const fetchProducts=async()=>{
         const {data} =await commerce.products.list();
@@ -25,18 +29,15 @@ const response=await commerce.cart.add(productId,quantity);
 
 
 setCart(response.cart);
-console.log("addded",cart);
     }
 
 
-// console.log(cart);
 
 
 const handleUpdateCartQty= async(productId,quantity)=>{
     const response=await commerce.cart.update(productId,{quantity});
     setCart(response.cart);
     
-console.log("addded1",cart);
 }
 
 
@@ -44,22 +45,41 @@ const handleRemoveFromCart= async (productId)=>{
     const response=await commerce.cart.remove(productId);
     setCart(response.cart);
     
-console.log("addded2",cart);
 
 }
 const handleEmptyCart=async()=>{
     const response= await commerce.cart.empty();
     setCart(response.cart);
     
-console.log("addded3",cart);
 }
 
 
-    
+const refreshCart=async()=>{
+    const newCart=await commerce.cart.refresh();
+    setboolcart(true);
+    setCart(newCart);
+}
+    const handleCaptureCheckout=async(checkoutTokenId,newOrder)=>{
+        console.log("checkoutcalled")
+        try{
+const incommingOrder=await commerce.checkout.capture(checkoutTokenId,newOrder);
+setOrder(incommingOrder);
+refreshCart();
+        }
+        catch(error){
+                seterrormessage(error.data.error.errormessage)
+        }
+
+
+    }
 useEffect(()=>{
     fetchProducts();
-    fetchCart();
-    },[cart]);
+
+    },[]);
+    const check=cart && boolcart;
+    useEffect(()=>{
+        fetchCart();
+        },[check ]);
   return (
 
     <Router>
@@ -73,11 +93,11 @@ useEffect(()=>{
 
 <Route exact path ="/cart">
     
-<Cart cart={cart} onUpdateCartQty={handleUpdateCartQty} onRemoveFromCart={handleRemoveFromCart} onEmptyCart={handleEmptyCart} />
+<Cart cart={cart} onUpdateCartQty={handleUpdateCartQty} onRemoveFromCart={handleRemoveFromCart} onEmptyCart={handleEmptyCart} setboolcart={setboolcart} />
          
 </Route>
 <Route path="/checkout" exact>
-            <Checkout />
+            <Checkout  cart={cart}  onCaptureCheckout={handleCaptureCheckout} order={order} error={errormessage}/>
           </Route>
     </Switch>
         </div>

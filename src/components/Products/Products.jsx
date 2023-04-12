@@ -17,9 +17,9 @@ const Products = ({products,onAddToCart}) => {
         <Product product={product}  onAddToCart={onAddToCart}/>
     
     </Grid>
-))};
+))}
     </Grid>
   </main>)
 };
 
-export default Products;
+export default Products

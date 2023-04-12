@@ -30,4 +30,4 @@ const Product = ({product,onAddToCart}) => {
   )
 }
 
-export default Product;
+export default Product
